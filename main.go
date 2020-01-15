@@ -23,6 +23,13 @@ var (
 	editor   = flag.String("editor", defaultEditor(), "preferred editor to use")
 )
 
+func defaultTerminal() string {
+	// NOTE(mperillo): The TERM environment variable is not usable.
+	// TODO(mperillo): Use a suitable terminal emulator based on the operating
+	// system.
+	return ""
+}
+
 func defaultEditor() string {
 	if editor, ok := os.LookupEnv("VISUAL"); ok {
 		return editor // even if it is empty
@@ -35,12 +42,6 @@ func defaultEditor() string {
 	return ""
 }
 
-func defaultTerminal() string {
-	// NOTE(mperillo): The TERM environment variable is not usable.
-	// TODO(mperillo): Use a suitable terminal emulator based on the operating
-	// system.
-	return ""
-}
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
