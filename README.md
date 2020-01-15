@@ -26,3 +26,7 @@ The editor used will be determined from, in order:
 
 Currently `workon` **requires** the terminal to be explicitly set with the
 `-terminal` flag, since the `TERM` environment variable is not usable.
+
+## TODO
+
+If no terminal or editor is available, select a default one based on the *OS*.
