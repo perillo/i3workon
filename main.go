@@ -18,9 +18,10 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-const terminal = "urxvt"
-
-var editor = flag.String("editor", defaultEditor(), "preferred editor to use")
+var (
+	terminal = flag.String("terminal", defaultTerminal(), "terminal to use")
+	editor   = flag.String("editor", defaultEditor(), "preferred editor to use")
+)
 
 func defaultEditor() string {
 	if editor, ok := os.LookupEnv("VISUAL"); ok {
@@ -34,6 +35,12 @@ func defaultEditor() string {
 	return ""
 }
 
+func defaultTerminal() string {
+	// NOTE(mperillo): The TERM environment variable is not usable.
+	// TODO(mperillo): Use a suitable terminal emulator based on the operating
+	// system.
+	return ""
+}
 func main() {
 	log.SetFlags(0)
 	flag.Parse()
@@ -44,8 +51,7 @@ func main() {
 		os.Exit(2)
 	}
 	path := flag.Arg(0)
-
-	if err := startTerminal(path); err != nil {
+	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
 	if err := startEditor(path, *editor); err != nil {
@@ -55,12 +61,12 @@ func main() {
 
 // startTerminal starts the preferred terminal and sets its current working
 // directory to dirpath.
-func startTerminal(dirpath string) error {
+func startTerminal(dirpath, terminal string) error {
 	attr := os.ProcAttr{
 		Dir: dirpath,
 		Env: os.Environ(),
 	}
-	args := []string{"-cd", dirpath}
+	args := []string{}
 	proc, err := spawn(terminal, args, &attr)
 	if err != nil {
 		return fmt.Errorf("starting terminal: %w", err)

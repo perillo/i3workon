@@ -12,7 +12,9 @@ project.
 
 ## Usage
 
-    workon -editor your.project.path
+    workon -terminal -editor your.project.path
+
+The terminal used will be determined from the `-terminal` flag.
 
 The editor used will be determined from, in order:
 
@@ -22,5 +24,5 @@ The editor used will be determined from, in order:
 
 ## Limitations
 
-Currently `workon` only support `urxvt` as terminal, since it needs to know the
-option to use for setting the terminal current working path.
+Currently `workon` **requires** the terminal to be explicitly set with the
+`-terminal` flag, since the `TERM` environment variable is not usable.
