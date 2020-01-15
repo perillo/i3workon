@@ -126,7 +126,6 @@ func gofiles(dirpath string) ([]string, error) {
 			files = append(files, path)
 		}
 	}
-	fmt.Println(files)
 
 	return files, nil
 }
