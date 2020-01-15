@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"golang.org/x/tools/go/packages"
@@ -19,10 +20,10 @@ import (
 
 const (
 	// Currently workon only support urxvt as terminal.
-	terminal = "/usr/bin/urxvt"
+	terminal = "urxvt"
 
 	// Currently workon only support gvim as editor.
-	editor = "/usr/bin/gvim"
+	editor = "gvim"
 )
 
 func main() {
@@ -125,6 +126,10 @@ func gofiles(dirpath string) ([]string, error) {
 // spawn is a wrapper around os.StartProcess that ensures the first argument is
 // set correctly.
 func spawn(path string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
+	path, err := exec.LookPath(path)
+	if err != nil {
+		return nil, err
+	}
 	argv = append([]string{path}, argv...)
 
 	return os.StartProcess(path, argv, attr)
