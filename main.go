@@ -51,6 +51,13 @@ func main() {
 		os.Exit(2)
 	}
 	path := flag.Arg(0)
+	if *terminal == "" {
+		log.Fatal("no terminal emulator available")
+	}
+	if *editor == "" {
+		log.Fatal("no editor available")
+	}
+
 	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
