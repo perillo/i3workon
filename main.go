@@ -18,13 +18,21 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-const (
-	// Currently workon only support urxvt as terminal.
-	terminal = "urxvt"
+const terminal = "urxvt"
 
-	// Currently workon only support gvim as editor.
-	editor = "gvim"
-)
+var editor = flag.String("editor", defaultEditor(), "preferred editor to use")
+
+func defaultEditor() string {
+	if editor, ok := os.LookupEnv("VISUAL"); ok {
+		return editor // even if it is empty
+	}
+	if editor, ok := os.LookupEnv("EDITOR"); ok {
+		return editor // even if it is empty
+	}
+
+	// TODO(mperillo): Use a suitable editor based on the operating system.
+	return ""
+}
 
 func main() {
 	log.SetFlags(0)
@@ -40,7 +48,7 @@ func main() {
 	if err := startTerminal(path); err != nil {
 		log.Fatal(err)
 	}
-	if err := startEditor(path); err != nil {
+	if err := startEditor(path, *editor); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -68,7 +76,7 @@ func startTerminal(dirpath string) error {
 
 // startEditor starts the preferred editor, sets its current working directory
 // to dirpath and opens all the Go files in dirpath, including nested packages.
-func startEditor(dirpath string) error {
+func startEditor(dirpath, editor string) error {
 	files, err := gofiles(dirpath)
 	if err != nil {
 		return fmt.Errorf("finding files to edit: %w", err)
