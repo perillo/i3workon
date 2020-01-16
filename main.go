@@ -44,14 +44,19 @@ func defaultEditor() string {
 
 func main() {
 	log.SetFlags(0)
-	flag.Parse()
 
+	flag.Usage = func() {
+		w := flag.CommandLine.Output()
+		fmt.Fprintln(w, "Usage: workon [flags] path")
+		fmt.Fprintf(w, "Flags:\n")
+		flag.PrintDefaults()
+	}
+	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
 
 		os.Exit(2)
 	}
-	path := flag.Arg(0)
 	if *terminal == "" {
 		log.Fatal("no terminal emulator available")
 	}
@@ -59,6 +64,7 @@ func main() {
 		log.Fatal("no editor available")
 	}
 
+	path := flag.Arg(0)
 	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
