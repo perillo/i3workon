@@ -19,8 +19,9 @@ import (
 )
 
 var (
-	terminal = flag.String("terminal", defaultTerminal(), "terminal to use")
-	editor   = flag.String("editor", defaultEditor(), "preferred editor to use")
+	workspace = flag.String("workspace", "", "workspace where to switch to")
+	terminal  = flag.String("terminal", defaultTerminal(), "terminal to use")
+	editor    = flag.String("editor", defaultEditor(), "preferred editor to use")
 )
 
 func defaultTerminal() string {
@@ -74,12 +75,36 @@ func main() {
 		log.Fatalf("path %s is not a directory", path)
 	}
 
+	if *workspace != "" {
+		if err := switchToWorkspace(*workspace); err != nil {
+			log.Fatal(err)
+		}
+	}
 	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
 	if err := startEditor(path, *editor); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// switchToWorkspace switches to workspace.
+func switchToWorkspace(workspace string) error {
+	// With i3, workspace can be an integer or a generic string.
+	msg := "workspace" + " " + workspace
+	attr := os.ProcAttr{}
+	args := []string{msg}
+	proc, err := spawn("i3-msg", args, &attr)
+	if err != nil {
+		return fmt.Errorf("switching to workspace %s: %w", workspace, err)
+	}
+
+	// Detach the new process from the current process.
+	if err := proc.Release(); err != nil {
+		return fmt.Errorf("releasing i3-msg process: %w", err)
+	}
+
+	return nil
 }
 
 // startTerminal starts the preferred terminal and sets its current working
