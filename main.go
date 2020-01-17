@@ -44,13 +44,14 @@ func defaultEditor() string {
 
 func main() {
 	log.SetFlags(0)
-
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
 		fmt.Fprintln(w, "Usage: workon [flags] path")
 		fmt.Fprintf(w, "Flags:\n")
 		flag.PrintDefaults()
 	}
+
+	// Parse and validate the flags
 	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
@@ -64,6 +65,7 @@ func main() {
 		log.Fatal("no editor available")
 	}
 
+	// Validate the argument.
 	path := flag.Arg(0)
 	switch t, err := isDir(path); {
 	case err != nil:
@@ -71,6 +73,7 @@ func main() {
 	case !t:
 		log.Fatalf("path %s is not a directory", path)
 	}
+
 	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
