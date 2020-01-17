@@ -1,4 +1,4 @@
-module github.com/perillo/workon
+module github.com/perillo/i3workon
 
 go 1.13
 
