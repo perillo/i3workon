@@ -65,6 +65,12 @@ func main() {
 	}
 
 	path := flag.Arg(0)
+	switch t, err := isDir(path); {
+	case err != nil:
+		log.Fatal(err)
+	case !t:
+		log.Fatalf("path %s is not a directory", path)
+	}
 	if err := startTerminal(path, *terminal); err != nil {
 		log.Fatal(err)
 	}
@@ -148,6 +154,16 @@ func gofiles(dirpath string) ([]string, error) {
 	}
 
 	return files, nil
+}
+
+// isDir returns true if path exists and it is a directory.
+func isDir(path string) (bool, error) {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false, err
+	}
+
+	return fi.IsDir(), nil
 }
 
 // spawn is a wrapper around os.StartProcess that ensures the first argument is
