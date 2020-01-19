@@ -15,18 +15,16 @@ project, when using the *i3* window manager.
 
     i3workon -workspace -terminal -editor your.project.path
 
-The terminal used will be determined from the `-terminal` flag.
+The terminal used will be determined from, in order:
+
+ 1. the `-terminal` flag
+ 2. the `TERMINAL` environment variable
 
 The editor used will be determined from, in order:
 
  1. the `-editor` flag
  2. the `VISUAL` environment variable
  3. the `EDITOR` environment variable
-
-## Limitations
-
-Currently `i3workon` **requires** the terminal to be explicitly set with the
-`-terminal` flag, since the `TERM` environment variable is not usable.
 
 ## TODO
 

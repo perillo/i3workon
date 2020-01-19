@@ -25,7 +25,13 @@ var (
 )
 
 func defaultTerminal() string {
-	// NOTE(mperillo): The TERM environment variable is not usable.
+	// NOTE(mperillo): The TERM environment variable is not usable, so we use
+	// the TERMINAL environment variable instead, as it is done in
+	// i3-sensible-terminal.
+	if term, ok := os.LookupEnv("TERMINAL"); ok {
+		return term // even it is is empty
+	}
+
 	// TODO(mperillo): Use a suitable terminal emulator based on the operating
 	// system.
 	return ""
