@@ -32,9 +32,7 @@ func defaultTerminal() string {
 		return term // even it is is empty
 	}
 
-	// TODO(mperillo): Use a suitable terminal emulator based on the operating
-	// system.
-	return ""
+	return "i3-sensible-terminal"
 }
 
 func defaultEditor() string {
@@ -45,8 +43,7 @@ func defaultEditor() string {
 		return editor // even if it is empty
 	}
 
-	// TODO(mperillo): Use a suitable editor based on the operating system.
-	return ""
+	return "i3-sensible-editor"
 }
 
 func main() {

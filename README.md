@@ -19,16 +19,14 @@ The terminal used will be determined from, in order:
 
  1. the `-terminal` flag
  2. the `TERMINAL` environment variable
+ 3. `i3-sensible-terminal`
 
 The editor used will be determined from, in order:
 
  1. the `-editor` flag
  2. the `VISUAL` environment variable
  3. the `EDITOR` environment variable
-
-## TODO
-
-If no terminal or editor is available, select a default one based on the *OS*.
+ 4. `i3-sensible-editor`
 
 ## NOTES
 
