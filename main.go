@@ -50,12 +50,12 @@ func main() {
 	log.SetFlags(0)
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
-		fmt.Fprintln(w, "Usage: workon [flags] path")
+		fmt.Fprintln(w, "Usage: i3workon [flags] path")
 		fmt.Fprintf(w, "Flags:\n")
 		flag.PrintDefaults()
 	}
 
-	// Parse and validate the flags
+	// Parse and validate the flags.
 	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
