@@ -28,6 +28,31 @@ The editor used will be determined from, in order:
  3. the `EDITOR` environment variable
  4. `i3-sensible-editor`
 
+## Named workspaces
+
+It is possible to specify the *workspace* as `<number>:<label>`.  As an
+example:
+
+  ```
+  i3workon -workspace "10:i3workon" ~/src/go/src/github.com/perillo/i3workon
+  ```
+
+This will make more easy to determine that we are working on the *i3workon*
+project on the workspace number 10.
+
+In order to be able to switch to a named workspace with its number, it is
+necessary to modify the default configuration in `.config/i3/config`:
+
+  ```
+  bindsym $mod+<n> workspace <n> => bindsym $mod+<n> workspace number <n>
+  ```
+  and
+  ```
+  bindsym $mod+Shift+<n> move container to workspace <n> => bindsym $mod+Shift+<n> move container to workspace number <n>
+  ```
+
+See also https://i3wm.org/docs/userguide.html#_strip_workspace_numbers_name
+
 ## NOTES
 
 `i3workon` is a fork of https://github.com/perillo/workon with the support for
