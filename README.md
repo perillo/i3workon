@@ -53,7 +53,7 @@ necessary to modify the default configuration in `.config/i3/config`:
 
 See also https://i3wm.org/docs/userguide.html#_strip_workspace_numbers_name
 
-## NOTES
+## Notes
 
 `i3workon` is a fork of https://github.com/perillo/workon with the support for
 workspaces.
