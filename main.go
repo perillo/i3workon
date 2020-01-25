@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Command workon starts the preferred terminal with its current working
+// Command i3workon starts the preferred terminal with its current working
 // directory set to the specified Go project and opens all the Go files in the
 // preferred editor.
 package main
