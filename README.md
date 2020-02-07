@@ -13,7 +13,14 @@ project, when using the *i3* window manager.
 
 ## Usage
 
-    i3workon -workspace -terminal -editor your.project.path
+    Usage: i3workon [flags] path
+    Flags:
+      -editor string
+           preferred editor to use
+      -terminal string
+           terminal to use
+      -workspace string
+           workspace where to switch to
 
 The terminal used will be determined from, in order:
 
