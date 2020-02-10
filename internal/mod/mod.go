@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// The isRelativePath function has been adapted from
+// src/go/build/build.go in the Go source distribution.
+// Copyright 2011 The Go Authors. All rights reserved.
+
 // Package mod implements support for local modules.
 //
 // A local module is a module whose module path, as defined in the module
@@ -13,6 +17,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/perillo/gocmd/modlist"
 )
@@ -25,6 +30,11 @@ type Module = modlist.Module
 // pattern can be an absolute directory or a module path.  A module path is
 // resolved relative to $GOPATH.
 func Resolve(pattern string) (*Module, error) {
+	if isRelativePath(pattern) {
+		// Reject it now, since it will be rejected later.
+		return nil, fmt.Errorf("resolve: %q: relative path", pattern)
+	}
+
 	if filepath.IsAbs(pattern) {
 		mod, err := load(pattern)
 		if err != nil {
@@ -111,4 +121,11 @@ func isDir(path string) bool {
 	}
 
 	return fi.IsDir()
+}
+
+// isRelativePath reports whether path is relative, like ".", "..", "./foo", or
+// "../foo".
+func isRelativePath(path string) bool {
+	return path == "." || path == ".." ||
+		strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../")
 }
