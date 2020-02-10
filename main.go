@@ -15,6 +15,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/perillo/i3workon/internal/mod"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -69,14 +70,12 @@ func main() {
 		log.Fatal("no editor available")
 	}
 
-	// Validate the argument.
-	path := flag.Arg(0)
-	switch t, err := isDir(path); {
-	case err != nil:
+	// Resolve the pattern passed as argument.
+	mod, err := mod.Resolve(flag.Arg(0))
+	if err != nil {
 		log.Fatal(err)
-	case !t:
-		log.Fatalf("path %s is not a directory", path)
 	}
+	path := mod.Dir
 
 	if *workspace != "" {
 		if err := switchToWorkspace(*workspace); err != nil {
@@ -185,16 +184,6 @@ func gofiles(dirpath string) ([]string, error) {
 	}
 
 	return files, nil
-}
-
-// isDir returns true if path exists and it is a directory.
-func isDir(path string) (bool, error) {
-	fi, err := os.Stat(path)
-	if err != nil {
-		return false, err
-	}
-
-	return fi.IsDir(), nil
 }
 
 // spawn is a wrapper around os.StartProcess that ensures the first argument is
