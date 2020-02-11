@@ -6,11 +6,11 @@
 // src/cmd/go/internal/search/search.go in the Go source distribution.
 // Copyright 2017 The Go Authors. All rights reserved.
 
-// Package mod implements support for local modules.
+// Package search implements support for searching local modules.
 //
 // A local module is a module whose module path, as defined in the module
 // directive in go.mod, is inside $GOPATH.
-package mod
+package search
 
 import (
 	"fmt"

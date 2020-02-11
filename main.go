@@ -15,7 +15,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/perillo/i3workon/internal/mod"
+	"github.com/perillo/i3workon/internal/search"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -71,7 +71,7 @@ func main() {
 	}
 
 	// Resolve the pattern passed as argument.
-	mod, err := mod.Resolve(flag.Arg(0))
+	mod, err := search.Resolve(flag.Arg(0))
 	if err != nil {
 		log.Fatal(err)
 	}
