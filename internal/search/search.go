@@ -14,16 +14,24 @@ package search
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/perillo/gocmd/modlist"
+	"golang.org/x/mod/modfile"
 )
 
 // Module represents a local module.
-type Module = modlist.Module
+type Module struct {
+	Path      string // module path
+	Version   string // module version
+	Main      bool   // is this the main module?
+	Dir       string // directory holding files for this module
+	GoMod     string // path to go.mod file for this module
+	GoVersion string // go version used in module
+}
 
 // A Match represents the result of matching a single module pattern.
 type Match struct {
@@ -60,7 +68,7 @@ func MatchModules(pattern string) *Match {
 			}
 
 			dir := filepath.Dir(path)
-			mod, err := load(dir)
+			mod, err := load(root, dir)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "can't load module: %v\n", err)
 
@@ -104,33 +112,47 @@ func Resolve(pattern string) (*Module, error) {
 
 // load loads the module at dirpath, that must be a directory containing the
 // go.mod file.
-// TODO(mperillo): Should load be reimplemented using
-// https://godoc.org/golang.org/x/mod/modfile instead of go list -m?
-func load(dirpath string) (*Module, error) {
+func load(root, dirpath string) (*Module, error) {
 	// TODO(mperillo): Should we check that the module path is valid (contains
 	// a dot in the first path segment)?  See golang.org/x/mod/module#CheckPath
-	l := modlist.Loader{
-		Dir: dirpath,
+	path := filepath.Join(dirpath, "go.mod")
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err // go.mod file was removed
 	}
-	mods, err := l.Load() // load current module
+
+	// Construct the module.
+	mod := &Module{
+		Dir:   dirpath,
+		GoMod: path,
+		Main:  true,
+	}
+	file, err := modfile.Parse(path, data, nil) // should we use ParseLax?
 	if err != nil {
 		return nil, err
 	}
-	mod := mods[0] // len(mods) is always > 0
+
+	// Handle missing module and go directives.
+	if file.Module != nil {
+		mod.Path = file.Module.Mod.Path
+		mod.Version = file.Module.Mod.Version
+	} else {
+		fmt.Fprintf(os.Stderr, "warning: missing module directive in %s\n", path)
+		mod.Path, _ = filepath.Rel(root, dirpath) // it is safe to ignore err
+	}
+	if file.Go != nil {
+		mod.GoMod = file.Go.Version
+	} else {
+		fmt.Fprintf(os.Stderr, "warning: missing go directive in %s\n", path)
+		mod.GoMod = "1.13"
+	}
 
 	// The module path, as defined in the module directive in go.mod, must be
 	// inside $GOPATH.
-	found := false
-	for _, root := range filepath.SplitList(gopath()) {
-		modpath := filepath.Join(root, "src", mod.Path)
-		if modpath == dirpath {
-			found = true
-
-			break
-		}
-	}
-	if !found {
-		return nil, fmt.Errorf("module %s: not in $GOPATH", mod.Path)
+	if filepath.Join(root, mod.Path) != dirpath {
+		// TODO(mperillo): Should we just print a warning in case mod.Path is
+		// not in $GOPATH?
+		return nil, fmt.Errorf("module %s: not in $GOPATH: %s", mod.Path, dirpath)
 	}
 
 	return mod, nil
