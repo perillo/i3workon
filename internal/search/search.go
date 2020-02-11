@@ -92,22 +92,38 @@ func MatchModules(pattern string) *Match {
 // pattern can be not be an absolute or relative path.  A module path is
 // resolved relative to $GOPATH.
 func Resolve(pattern string) (*Module, error) {
+	match := ModulePath(pattern)
+	if len(match.Modules) != 1 {
+		return nil, fmt.Errorf("resolve %q: unable to resolve", pattern)
+	}
+
+	return match.Modules[0], nil
+}
+
+// ModulePath returns the matching paths to use for the given command line.
+func ModulePath(pattern string) *Match {
+	// There is no much to to, since we don't support absolute and relative
+	// filesystem paths and have only one pattern.
 	if filepath.IsAbs(pattern) {
-		return nil, fmt.Errorf("resolve: %q: absolute path", pattern)
+		fmt.Fprintf(os.Stderr, "not supported: %q: absolute path\n", pattern)
+
+		return new(Match) // for consistency
 	}
 	if isRelativePath(pattern) {
-		return nil, fmt.Errorf("resolve: %q: relative path", pattern)
+		fmt.Fprintf(os.Stderr, "not supported: %q: relative path\n", pattern)
+
+		return new(Match) // for consistency
 	}
 
-	m := MatchModules(pattern)
-	switch {
-	case len(m.Modules) == 0:
-		return nil, fmt.Errorf("resolve: %q: no modules matched", pattern)
-	case len(m.Modules) > 1:
-		return nil, fmt.Errorf("resolve: %q: multiple modules matched", pattern)
+	match := MatchModules(pattern)
+	if len(match.Modules) == 0 {
+		fmt.Fprintf(os.Stderr, "warning: %q matched no modules\n", pattern)
+	}
+	if len(match.Modules) > 1 {
+		fmt.Fprintf(os.Stderr, "warning: %q matched multiple modules\n", pattern)
 	}
 
-	return m.Modules[0], nil
+	return match
 }
 
 // load loads the module at dirpath, that must be a directory containing the
