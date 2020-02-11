@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// The isRelativePath function has been adapted from
-// src/go/build/build.go in the Go source distribution.
-// Copyright 2011 The Go Authors. All rights reserved.
+// The code for module matching has been adapted from
+// src/cmd/go/internal/search/search.go in the Go source distribution.
+// Copyright 2017 The Go Authors. All rights reserved.
 
 // Package mod implements support for local modules.
 //
@@ -13,10 +13,10 @@
 package mod
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/perillo/gocmd/modlist"
@@ -25,49 +25,88 @@ import (
 // Module represents a local module.
 type Module = modlist.Module
 
+// A Match represents the result of matching a single module pattern.
+type Match struct {
+	Pattern string    // the pattern itself
+	Literal bool      // whether it is a literal (no wildcards)
+	Modules []*Module // matching modules
+}
+
+// MatchModules returns all the modules that can be found under the $GOPATH
+// directories matching pattern.  The pattern is a path including "...".
+func MatchModules(pattern string) *Match {
+	m := &Match{
+		Pattern: pattern,
+		Literal: isLiteral(pattern),
+	}
+	match := matchPattern(pattern)
+
+	for _, dirpath := range filepath.SplitList(gopath()) {
+		src := filepath.Join(dirpath, "src")
+		src = filepath.Clean(src) + string(filepath.Separator)
+		root := src
+
+		filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
+			if err != nil || path == src {
+				return nil
+			}
+
+			if fi.IsDir() {
+				return nil
+			}
+			name := filepath.Base(path)
+			if name != "go.mod" {
+				return nil
+			}
+
+			dir := filepath.Dir(path)
+			mod, err := load(dir)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "can't load module: %v\n", err)
+
+				return nil
+			}
+
+			if !match(mod.Path) {
+				return nil
+			}
+			m.Modules = append(m.Modules, mod)
+
+			return nil
+		})
+	}
+
+	return m
+}
+
 // Resolve resolves pattern to a local Go module.
 //
-// pattern can be an absolute directory or a module path.  A module path is
+// pattern can be not be an absolute or relative path.  A module path is
 // resolved relative to $GOPATH.
 func Resolve(pattern string) (*Module, error) {
+	if filepath.IsAbs(pattern) {
+		return nil, fmt.Errorf("resolve: %q: absolute path", pattern)
+	}
 	if isRelativePath(pattern) {
-		// Reject it now, since it will be rejected later.
 		return nil, fmt.Errorf("resolve: %q: relative path", pattern)
 	}
 
-	if filepath.IsAbs(pattern) {
-		mod, err := load(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("resolve: %q: %q", pattern, err)
-		}
-
-		return mod, nil
+	m := MatchModules(pattern)
+	switch {
+	case len(m.Modules) == 0:
+		return nil, fmt.Errorf("resolve: %q: no modules matched", pattern)
+	case len(m.Modules) > 1:
+		return nil, fmt.Errorf("resolve: %q: multiple modules matched", pattern)
 	}
 
-	// Make the remote module path local, relative to $GOPATH.
-	for _, root := range filepath.SplitList(gopath()) {
-		path := filepath.Join(root, "src", pattern)
-		if isDir(path) {
-			mod, err := load(path)
-			if err != nil {
-				return nil, fmt.Errorf("resolve: %q: %q", pattern, err)
-			}
-
-			return mod, nil
-		}
-	}
-
-	return nil, fmt.Errorf("resolve: %q: unable to resolve", pattern)
+	return m.Modules[0], nil
 }
 
-// load loads the module at dirpath.
+// load loads the module at dirpath, that must be a directory containing the
+// go.mod file.
 // TODO(mperillo): Should load be reimplemented using
 // https://godoc.org/golang.org/x/mod/modfile instead of go list -m?
 func load(dirpath string) (*Module, error) {
-	if !isDir(dirpath) {
-		return nil, errors.New("not a directory")
-	}
-
 	// TODO(mperillo): Should we check that the module path is valid (contains
 	// a dot in the first path segment)?  See golang.org/x/mod/module#CheckPath
 	l := modlist.Loader{
@@ -78,12 +117,6 @@ func load(dirpath string) (*Module, error) {
 		return nil, err
 	}
 	mod := mods[0] // len(mods) is always > 0
-
-	// Unfortunately go list -m does not return an error if there is no go.mod
-	// file.
-	if mod.GoMod == "" {
-		return nil, errors.New("not a module")
-	}
 
 	// The module path, as defined in the module directive in go.mod, must be
 	// inside $GOPATH.
@@ -97,7 +130,7 @@ func load(dirpath string) (*Module, error) {
 		}
 	}
 	if !found {
-		return nil, errors.New("module not in $GOPATH")
+		return nil, fmt.Errorf("module %s: not in $GOPATH", mod.Path)
 	}
 
 	return mod, nil
@@ -123,9 +156,35 @@ func isDir(path string) bool {
 	return fi.IsDir()
 }
 
-// isRelativePath reports whether path is relative, like ".", "..", "./foo", or
-// "../foo".
+// isLiteral returns true if pattern does not contain wildcards.
+func isLiteral(pattern string) bool {
+	return !strings.Contains(pattern, "...")
+}
+
+// isRelativePath reports whether pattern should be interpreted as a directory
+// path relative to the current directory, as opposed to a pattern matching
+// module paths.
 func isRelativePath(path string) bool {
 	return path == "." || path == ".." ||
 		strings.HasPrefix(path, "./") || strings.HasPrefix(path, "../")
+}
+
+// matchPattern(pattern)(name) reports whether name matches pattern.
+// Pattern is a limited glob pattern in which '...' has the same meaning as in
+// the go tool.
+func matchPattern(pattern string) func(name string) bool {
+	// Convert pattern to regular expression.
+	// The strategy for the trailing /... is the same as the one used in the go
+	// tool.
+	re := regexp.QuoteMeta(pattern)
+	if strings.HasSuffix(re, `/\.\.\.`) {
+		re = strings.TrimSuffix(re, `/\.\.\.`) + `(/\.\.\.)?`
+	}
+	re = strings.ReplaceAll(re, `\.\.\.`, `.*`)
+
+	reg := regexp.MustCompile(`^` + re + `$`)
+
+	return func(name string) bool {
+		return reg.MatchString(name)
+	}
 }
