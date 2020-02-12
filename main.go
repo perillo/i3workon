@@ -15,8 +15,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/perillo/i3workon/internal/search"
 	"golang.org/x/tools/go/packages"
+
+	"github.com/perillo/i3workon/internal/load"
 )
 
 var (
@@ -71,7 +72,7 @@ func main() {
 	}
 
 	// Resolve the pattern passed as argument.
-	mod, err := search.Resolve(flag.Arg(0))
+	mod, err := resolve(flag.Arg(0))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -196,4 +197,17 @@ func spawn(path string, argv []string, attr *os.ProcAttr) (*os.Process, error) {
 	argv = append([]string{path}, argv...)
 
 	return os.StartProcess(path, argv, attr)
+}
+
+// resolve resolves pattern to a local Go module.
+//
+// pattern can be not be an absolute or relative path.  A module path is
+// resolved relative to $GOPATH.
+func resolve(pattern string) (*load.Module, error) {
+	mods := load.Modules(pattern)
+	if len(mods) != 1 {
+		return nil, fmt.Errorf("resolve %q: unable to resolve", pattern)
+	}
+
+	return mods[0], nil
 }
