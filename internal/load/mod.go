@@ -20,6 +20,7 @@ import (
 
 	"github.com/perillo/i3workon/internal/search"
 	"golang.org/x/mod/modfile"
+	"golang.org/x/mod/module"
 )
 
 // Module represents a local module.
@@ -107,7 +108,17 @@ func load(raw *search.Module) (*Module, error) {
 
 	// Handle missing module and go directives.
 	if file.Module != nil {
-		mod.Path = file.Module.Mod.Path
+		modpath := file.Module.Mod.Path
+		// We should probably use CheckPath, but since go mod init will not do
+		// it, we do the same.
+		if err := module.CheckImportPath(modpath); err != nil {
+			err := &ModuleError{
+				Err: fmt.Sprintf("module %s: invalid importpath: %s", modpath, err),
+			}
+			mod.Error = err
+		}
+
+		mod.Path = modpath
 		mod.Version = file.Module.Mod.Version
 	} else {
 		fmt.Fprintf(os.Stderr, "warning: missing module directive in %s\n", raw.GoMod)
