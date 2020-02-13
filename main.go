@@ -23,19 +23,8 @@ import (
 var (
 	workspace = flag.String("workspace", "", "workspace where to switch to")
 	terminal  = flag.String("terminal", "i3-sensible-terminal", "terminal to use")
-	editor    = flag.String("editor", defaultEditor(), "preferred editor to use")
+	editor    = flag.String("editor", "i3-sensible-editor", "editor to use")
 )
-
-func defaultEditor() string {
-	if editor, ok := os.LookupEnv("VISUAL"); ok {
-		return editor // even if it is empty
-	}
-	if editor, ok := os.LookupEnv("EDITOR"); ok {
-		return editor // even if it is empty
-	}
-
-	return "i3-sensible-editor"
-}
 
 func main() {
 	log.SetFlags(0)
