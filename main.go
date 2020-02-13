@@ -22,20 +22,9 @@ import (
 
 var (
 	workspace = flag.String("workspace", "", "workspace where to switch to")
-	terminal  = flag.String("terminal", defaultTerminal(), "terminal to use")
+	terminal  = flag.String("terminal", "i3-sensible-terminal", "terminal to use")
 	editor    = flag.String("editor", defaultEditor(), "preferred editor to use")
 )
-
-func defaultTerminal() string {
-	// NOTE(mperillo): The TERM environment variable is not usable, so we use
-	// the TERMINAL environment variable instead, as it is done in
-	// i3-sensible-terminal.
-	if term, ok := os.LookupEnv("TERMINAL"); ok {
-		return term // even it is is empty
-	}
-
-	return "i3-sensible-terminal"
-}
 
 func defaultEditor() string {
 	if editor, ok := os.LookupEnv("VISUAL"); ok {
