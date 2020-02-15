@@ -17,6 +17,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/perillo/i3workon/internal/search"
 	"golang.org/x/mod/modfile"
@@ -33,6 +34,17 @@ type Module struct {
 	GoVersion string       // go version used in module
 	Root      string       // Go path dir containing this module
 	Error     *ModuleError // error loading module
+}
+
+// Name returns the short name of the module.
+func (m *Module) Name() string {
+	// The code assumes that Path is correct, since it was validate by load.
+	i := strings.LastIndexByte(m.Path, '/')
+	if i > 0 {
+		return m.Path[i+1:]
+	}
+
+	return m.Path
 }
 
 // ModuleError represents a module error.

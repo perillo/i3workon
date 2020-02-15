@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	workspace = flag.String("workspace", "", "workspace where to switch to")
+	workspace = flag.Int("workspace", 0, "workspace where to switch to")
 	terminal  = flag.String("terminal", "i3-sensible-terminal", "terminal to use")
 	editor    = flag.String("editor", "i3-sensible-editor", "editor to use")
 )
@@ -56,8 +56,11 @@ func main() {
 	}
 	path := mod.Dir
 
-	if *workspace != "" {
-		if err := switchToWorkspace(*workspace); err != nil {
+	if *workspace > 0 {
+		// Set the workspace label to the module name.  Note that by default
+		// workspace numbers start at 1.
+		spec := fmt.Sprintf("%d:%s", *workspace, mod.Name())
+		if err := switchToWorkspace(spec); err != nil {
 			log.Fatal(err)
 		}
 	}
