@@ -138,7 +138,7 @@ func gofiles(dirpath string) ([]string, error) {
 
 	list, err := l.Load("./...")
 	if err != nil {
-		return nil, fmt.Errorf("loading packages: %w", err)
+		return nil, err
 	}
 
 	files := make([]string, 0, 10)
