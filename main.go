@@ -15,7 +15,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"golang.org/x/tools/go/packages"
+	"github.com/perillo/gocmd/pkglist"
 
 	"github.com/perillo/i3workon/internal/load"
 )
@@ -133,22 +133,18 @@ func startEditor(dirpath, editor string) error {
 
 // gofiles returns all the files in the Go project at dirpath.
 func gofiles(dirpath string) ([]string, error) {
-	cfg := &packages.Config{
-		Dir:  dirpath,
-		Mode: packages.NeedName | packages.NeedFiles,
+	l := pkglist.Loader{
+		Dir: dirpath,
 	}
 
-	pkgs, err := packages.Load(cfg, "./...")
+	list, err := l.Load("./...")
 	if err != nil {
 		return nil, fmt.Errorf("loading packages: %w", err)
 	}
-	if n := packages.PrintErrors(pkgs); n > 0 {
-		return nil, fmt.Errorf("unable to correctly load %d packages", n)
-	}
 
 	files := make([]string, 0, 10)
-	for _, pkg := range pkgs {
-		for _, path := range pkg.GoFiles {
+	for _, p := range list {
+		for _, path := range concat(p.GoFiles, p.CgoFiles, p.IgnoredGoFiles) {
 			// path is an absolute path, but since the editor working directory
 			// has been set to dirpath, make it relative to it.
 			path, err := filepath.Rel(dirpath, path)
@@ -185,4 +181,14 @@ func resolve(pattern string) (*load.Module, error) {
 	}
 
 	return mods[0], nil
+}
+
+// concat concatenates args into a single []string.
+func concat(args ...[]string) []string {
+	var buf []string
+	for _, arg := range args {
+		buf = append(buf, arg...)
+	}
+
+	return buf
 }
