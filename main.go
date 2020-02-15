@@ -42,12 +42,6 @@ func main() {
 
 		os.Exit(2)
 	}
-	if *terminal == "" {
-		log.Fatal("no terminal emulator available")
-	}
-	if *editor == "" {
-		log.Fatal("no editor available")
-	}
 
 	// Resolve the pattern passed as argument.
 	mod, err := resolve(flag.Arg(0))
