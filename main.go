@@ -13,7 +13,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/perillo/gocmd/pkglist"
 
@@ -145,12 +144,6 @@ func gofiles(dirpath string) ([]string, error) {
 	files := make([]string, 0, 10)
 	for _, p := range list {
 		for _, path := range concat(p.GoFiles, p.CgoFiles, p.IgnoredGoFiles) {
-			// path is an absolute path, but since the editor working directory
-			// has been set to dirpath, make it relative to it.
-			path, err := filepath.Rel(dirpath, path)
-			if err != nil {
-				return nil, fmt.Errorf("processing go files: %v", err)
-			}
 			files = append(files, path)
 		}
 	}
