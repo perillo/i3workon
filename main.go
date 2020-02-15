@@ -16,6 +16,7 @@ import (
 
 	"github.com/perillo/gocmd/pkglist"
 
+	"github.com/perillo/i3workon/internal/i3"
 	"github.com/perillo/i3workon/internal/load"
 )
 
@@ -53,7 +54,7 @@ func main() {
 		// Set the workspace label to the module name.  Note that by default
 		// workspace numbers start at 1.
 		spec := fmt.Sprintf("%d:%s", *workspace, mod.Name())
-		if err := switchToWorkspace(spec); err != nil {
+		if err := i3.Workspace(spec); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -63,25 +64,6 @@ func main() {
 	if err := startEditor(path, *editor); err != nil {
 		log.Fatal(err)
 	}
-}
-
-// switchToWorkspace switches to workspace.
-func switchToWorkspace(workspace string) error {
-	// With i3, workspace can be an integer or a generic string.
-	msg := "workspace" + " " + workspace
-	attr := os.ProcAttr{}
-	args := []string{msg}
-	proc, err := spawn("i3-msg", args, &attr)
-	if err != nil {
-		return fmt.Errorf("switching to workspace %s: %w", workspace, err)
-	}
-
-	// Detach the new process from the current process.
-	if err := proc.Release(); err != nil {
-		return fmt.Errorf("releasing i3-msg process: %w", err)
-	}
-
-	return nil
 }
 
 // startTerminal starts the preferred terminal and sets its current working
