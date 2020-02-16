@@ -18,13 +18,13 @@ import (
 // invoke invokes the i3-msg command with the specified msgtype and msg.
 //
 // If the i3-msg command returns a non 0 exit status, invoke will return a
-// nil *bytes.Buffer and an error.
+// nil []byte and an error.
 //
 // If the i3-msg command returns a 0 exit status, invoke will return the
-// stdout content as an *bytes.Buffer and a nil error.
+// stdout content as a []byte and a nil error.
 //
 // The child process stderr will be redirected to the parent process stderr.
-func invoke(msgtype, msg string) (*bytes.Buffer, error) {
+func invoke(msgtype, msg string) ([]byte, error) {
 	stdout := new(bytes.Buffer)
 
 	cmd := exec.Command("i3-msg", "-t", msgtype, msg)
@@ -35,5 +35,5 @@ func invoke(msgtype, msg string) (*bytes.Buffer, error) {
 		return nil, fmt.Errorf("i3-msg -t %s %s: %v", msgtype, msg, err)
 	}
 
-	return stdout, nil
+	return stdout.Bytes(), nil
 }

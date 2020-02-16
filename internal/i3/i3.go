@@ -6,7 +6,6 @@
 package i3
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -96,8 +95,7 @@ func workspaces() ([]*workspace, error) {
 	return list, nil
 }
 
-func decode(buf *bytes.Buffer) ([]*workspace, error) {
-	data := buf.Bytes()
+func decode(data []byte) ([]*workspace, error) {
 	list := make([]*workspace, 0, 10)
 	if err := json.Unmarshal(data, &list); err != nil {
 		return nil, fmt.Errorf("JSON decode: %w", err)
