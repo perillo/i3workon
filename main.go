@@ -48,7 +48,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	path := mod.Dir
 
 	if *workspace == 0 {
 		*workspace, err = i3.NextWorkspace()
@@ -63,19 +62,19 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	if err := startTerminal(path, *terminal); err != nil {
+	if err := startTerminal(mod, *terminal); err != nil {
 		log.Fatal(err)
 	}
-	if err := startEditor(path, *editor); err != nil {
+	if err := startEditor(mod, *editor); err != nil {
 		log.Fatal(err)
 	}
 }
 
-// startTerminal starts the preferred terminal and sets its current working
-// directory to dirpath.
-func startTerminal(dirpath, terminal string) error {
+// startTerminal starts terminal and sets its current working directory to
+// the module m root directory.
+func startTerminal(m *load.Module, terminal string) error {
 	attr := os.ProcAttr{
-		Dir: dirpath,
+		Dir: m.Dir,
 		Env: os.Environ(),
 	}
 	args := []string{}
@@ -92,16 +91,17 @@ func startTerminal(dirpath, terminal string) error {
 	return nil
 }
 
-// startEditor starts the preferred editor, sets its current working directory
-// to dirpath and opens all the Go files in dirpath, including nested packages.
-func startEditor(dirpath, editor string) error {
-	files, err := gofiles(dirpath)
+// startEditor starts editor, sets its current working directory to the module
+// m root directory and opens all the Go files in it, including nested
+// packages.
+func startEditor(m *load.Module, editor string) error {
+	files, err := gofiles(m)
 	if err != nil {
 		return fmt.Errorf("finding files to edit: %w", err)
 	}
 
 	attr := os.ProcAttr{
-		Dir: dirpath,
+		Dir: m.Dir,
 		Env: os.Environ(),
 	}
 	proc, err := spawn(editor, files, &attr)
@@ -117,10 +117,10 @@ func startEditor(dirpath, editor string) error {
 	return nil
 }
 
-// gofiles returns all the files in the Go project at dirpath.
-func gofiles(dirpath string) ([]string, error) {
+// gofiles returns all the files in the module m.
+func gofiles(m *load.Module) ([]string, error) {
 	l := pkglist.Loader{
-		Dir: dirpath,
+		Dir: m.Dir,
 	}
 
 	list, err := l.Load("./...")
