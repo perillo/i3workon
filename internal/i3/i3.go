@@ -46,13 +46,13 @@ func (w *workspace) Number() int {
 	return parse(w.Name[:i])
 }
 
-// Workspace switches to workspace.
-func Workspace(workspace string) error {
+// Workspace switches to workspace with specified number and name.
+func Workspace(num int, name string) error {
 	// With i3, workspace can be an integer or a generic string.
-	msg := "workspace" + " " + workspace
+	msg := fmt.Sprintf("workspace %d:%s", num, name)
 	_, err := invoke("command", msg)
 	if err != nil {
-		return fmt.Errorf("workspace %s: %w", workspace, err)
+		return fmt.Errorf("workspace %d:%s: %w", num, name, err)
 	}
 
 	return nil

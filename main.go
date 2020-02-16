@@ -59,8 +59,7 @@ func main() {
 	if *workspace > 0 {
 		// Set the workspace label to the module name.  Note that by default
 		// workspace numbers start at 1.
-		spec := fmt.Sprintf("%d:%s", *workspace, mod.Name())
-		if err := i3.Workspace(spec); err != nil {
+		if err := i3.Workspace(*workspace, mod.Name()); err != nil {
 			log.Fatal(err)
 		}
 	}
