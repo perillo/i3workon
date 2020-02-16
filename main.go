@@ -50,6 +50,12 @@ func main() {
 	}
 	path := mod.Dir
 
+	if *workspace == 0 {
+		*workspace, err = i3.NextWorkspace()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 	if *workspace > 0 {
 		// Set the workspace label to the module name.  Note that by default
 		// workspace numbers start at 1.
