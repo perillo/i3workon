@@ -105,10 +105,12 @@ func load(raw *search.Module) (*Module, error) {
 		return nil, err // go.mod file was removed
 	}
 
-	// Construct the module.
+	// Construct the module.  The Main field is set to false, since it is
+	// onerous to determine if the module is a main module.
+	// See https://tip.golang.org/ref/modules#glos-main-module.
 	mod := &Module{
 		Path:  raw.Path,
-		Main:  true, // not sure
+		Main:  false,
 		Dir:   raw.Dir,
 		GoMod: raw.GoMod,
 		Root:  raw.Root,
