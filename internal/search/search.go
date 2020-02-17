@@ -97,7 +97,10 @@ func ModulePath(pattern string) *Match {
 		fmt.Fprintf(os.Stderr, "warning: %q matched no modules\n", pattern)
 	}
 	if len(match.Modules) > 1 {
-		fmt.Fprintf(os.Stderr, "warning: %q matched multiple modules\n", pattern)
+		fmt.Fprintf(os.Stderr, "warning: %q matched multiple modules:\n", pattern)
+		for _, m := range match.Modules {
+			fmt.Fprintf(os.Stderr, "\t%s\n", m.Path)
+		}
 	}
 
 	return match
