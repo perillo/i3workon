@@ -18,6 +18,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/perillo/gocmd/env"
 )
 
 // Module represents a local raw module.
@@ -117,12 +119,13 @@ func mkmod(root, dirpath string) *Module {
 }
 
 func gopath() string {
-	// TODO(mperillo): Should we get $GOPATH from go env, instead of os.Getenv?
-	value, ok := os.LookupEnv("GOPATH")
-	if !ok {
-		panic("GOPATH not found")
+	value, err := env.Getenv("GOPATH")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "unable to get GOPATH: %v", err)
+		os.Exit(1)
 	}
 
+	// value can not be empty.
 	return value
 }
 
