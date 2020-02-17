@@ -57,17 +57,14 @@ func MatchModules(pattern string) *Match {
 			if fi.IsDir() {
 				return nil
 			}
-			name := filepath.Base(path)
-			if name != "go.mod" {
+			if filepath.Base(path) != "go.mod" {
 				return nil
 			}
 
-			dir := filepath.Dir(path)
-			mod := mkmod(root, dir)
+			mod := mkmod(root, filepath.Dir(path))
 			if !match(mod.Path) {
 				return nil
 			}
-
 			m.Modules = append(m.Modules, mod)
 
 			return nil
