@@ -118,7 +118,7 @@ func load(raw *search.Module) (*Module, error) {
 		return nil, err
 	}
 
-	// Handle missing module and go directives.
+	// Handle missing module directive.
 	if file.Module != nil {
 		modpath := file.Module.Mod.Path
 		// We should probably use CheckPath, but since go mod init will not do
@@ -135,6 +135,8 @@ func load(raw *search.Module) (*Module, error) {
 	} else {
 		fmt.Fprintf(os.Stderr, "warning: missing module directive in %s\n", raw.GoMod)
 	}
+
+	// Handle missing go directive.
 	if file.Go != nil {
 		mod.GoMod = file.Go.Version
 	} else {
