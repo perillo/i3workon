@@ -47,7 +47,6 @@ func (w *workspace) Number() int {
 
 // Workspace switches to workspace with specified number and name.
 func Workspace(num int, name string) error {
-	// With i3, workspace can be an integer or a generic string.
 	msg := fmt.Sprintf("workspace %d:%s", num, name)
 	_, err := invoke("command", msg)
 	if err != nil {
