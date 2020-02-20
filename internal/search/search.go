@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// The code for module matching has been adapted from
+// The code and the API has been adapted from
 // src/cmd/go/internal/search/search.go in the Go source distribution.
 // Copyright 2017 The Go Authors. All rights reserved.
 
