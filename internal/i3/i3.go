@@ -103,8 +103,7 @@ func decode(data []byte) ([]*workspace, error) {
 	return list, nil
 }
 
-// parse parses the string and returns a positive number, or 0 in case of
-// errors.
+// parse parses s and returns a positive number, or 0 in case of errors.
 func parse(s string) int {
 	n, err := strconv.Atoi(s)
 	if err != nil || n < 0 {
