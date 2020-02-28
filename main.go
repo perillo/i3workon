@@ -33,14 +33,14 @@ func main() {
 		fmt.Fprintln(w, "Usage: i3workon [flags] path")
 		fmt.Fprintf(w, "Flags:\n")
 		flag.PrintDefaults()
+
+		os.Exit(2)
 	}
 
 	// Parse and validate the flags.
 	flag.Parse()
 	if flag.NArg() != 1 {
 		flag.Usage()
-
-		os.Exit(2)
 	}
 
 	// Resolve the pattern passed as argument.
