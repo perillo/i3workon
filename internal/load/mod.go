@@ -57,7 +57,7 @@ func (me *ModuleError) Error() string {
 	return me.Err
 }
 
-// Modules returns the modules named by the command line argument arg. If a
+// Modules returns the modules named by the command line argument arg.  If a
 // named module cannot be loaded at all (for example, if the go.mod file has
 // problems), then Modules prints an error and does not include that module in
 // the results.
