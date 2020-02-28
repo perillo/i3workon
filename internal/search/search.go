@@ -153,7 +153,7 @@ func matchPattern(pattern string) func(name string) bool {
 	if strings.HasSuffix(re, `/\.\.\.`) {
 		re = strings.TrimSuffix(re, `/\.\.\.`) + `(/\.\.\.)?`
 	}
-	re = strings.ReplaceAll(re, `\.\.\.`, `.*`)
+	re = strings.Replace(re, `\.\.\.`, `.*`, -1)
 
 	reg := regexp.MustCompile(`^` + re + `$`)
 

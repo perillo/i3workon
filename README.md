@@ -74,6 +74,11 @@ $ i3workon github.com/perillo/i3workon
 ![screenshot](https://user-images.githubusercontent.com/6217088/74610387-12265b00-50f3-11ea-82c7-af0d58d42435.jpg)
 
 
+## Requirements
+
+`i3workon` requires at least *Go* 1.11.
+
+
 ## Notes
 
 `i3workon` is a fork of https://github.com/perillo/workon with the support for
